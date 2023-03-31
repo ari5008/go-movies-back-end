@@ -31,9 +31,6 @@ func main() {
 
 	// read from command line
 	dsn := os.Getenv("DATABASE_URL")
-	dsn += " sslmode=disable"
-	dsn += " timezone=UTC"
-	dsn += " connect_timeout=5"
 	flag.StringVar(&app.DSN, "dsn", dsn, "Postgres connection string")
 	flag.StringVar(&app.JWTSecret, "jwt-secret", "verysecret", "signing secret")
 	flag.StringVar(&app.JWTIssuer, "jwt-issuer", "example.com", "signing issuer")
