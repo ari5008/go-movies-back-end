@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -21,7 +22,7 @@ type application struct {
 	JWTIssuer    string
 	JWTAudience  string
 	CookieDomain string
-	APIKey	string
+	APIKey       string
 }
 
 func main() {
@@ -29,7 +30,11 @@ func main() {
 	var app application
 
 	// read from command line
-	flag.StringVar(&app.DSN, "dsn", "host=dpg-cgjdor8rjeniukf1s7og-a port=5432 user=user password=lSg3xHEaKtLUBa3GVYEfckRDDw8d0Ak4 dbname=go_movies_n8s5 sslmode=disable timezone=UTC connect_timeout=5", "Postgres connection string")
+	dsn := os.Getenv("DATABASE_URL")
+	dsn += " sslmode=disable"
+	dsn += " timezone=UTC"
+	dsn += " connect_timeout=5"
+	flag.StringVar(&app.DSN, "dsn", dsn, "Postgres connection string")
 	flag.StringVar(&app.JWTSecret, "jwt-secret", "verysecret", "signing secret")
 	flag.StringVar(&app.JWTIssuer, "jwt-issuer", "example.com", "signing issuer")
 	flag.StringVar(&app.JWTAudience, "jwt-audience", "example.com", "signing audience")
@@ -47,14 +52,14 @@ func main() {
 	defer app.DB.Connection().Close()
 
 	app.auth = Auth{
-		Issuer: app.JWTIssuer,
-		Audience: app.JWTAudience,
-		Secret: app.JWTSecret,
-		TokenExpiry: time.Minute * 15,
+		Issuer:        app.JWTIssuer,
+		Audience:      app.JWTAudience,
+		Secret:        app.JWTSecret,
+		TokenExpiry:   time.Minute * 15,
 		RefreshExpiry: time.Hour * 24,
-		CookiePath: "/",
-		CookieName: "__Host-refresh_token",
-		CookieDomain: app.CookieDomain,
+		CookiePath:    "/",
+		CookieName:    "__Host-refresh_token",
+		CookieDomain:  app.CookieDomain,
 	}
 
 	log.Println("Starting application on port", port)
